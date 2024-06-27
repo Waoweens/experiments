@@ -1,0 +1,11 @@
+[Unit]
+Description=Block lid switch when a sleep inhibit is active
+After=plasma-workspace.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env python3 %h/.local/bin/block-lid-switch.py
+Restart=always
+
+[Install]
+WantedBy=default.target
