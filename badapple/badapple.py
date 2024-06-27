@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Bad Apple!! but with 300 (+ parent) nested compositors
+# Bad Apple!! but with nested Wayland compositors
 # why use a graphics library when you can spawn a window manager for every pixel?
 # IMPORTANT: SCREEN LOCKING MUST BE BLOCKED
 # NOTE: may add unexpected system tray entries
@@ -21,7 +21,10 @@ import concurrent.futures
 from PIL import Image
 
 parent_size = [640, 480]
-pixel_size = 32
+pixel_size = 32 # 20x15 @ 640x480
+test_frame = 'badapple/ba-20x15-test.png' # 20x15 @ 640x480
+# pixel_size 16 # 40x30 @ 640x480
+#test_frame = 'badapple/ba-40x30-test.png' # 40x30 @ 640x480
 
 def create_compositor(index, pixel_size, environment):
 	environment['WAYLAND_DISPLAY'] = 'badapple-parent'
@@ -51,7 +54,7 @@ def set_pixel(environment, index, color):
 	subprocess.Popen(['swaybg', '-c', color_code, '-m', 'solid_color'], env=environment)
 
 def set_frame(environment, frame):
-	# set color for all 300 windows
+	# set color for all windows
 	with concurrent.futures.ThreadPoolExecutor() as executor:
 		futures = [
 			executor.submit(set_pixel, environment.copy(), (index + 1), color)
@@ -66,8 +69,9 @@ def image_to_frame(image_path):
 	return [1 if pixel == 255 else 0 for pixel in list(img.getdata())]
 
 def main():
-	global parent_size, pixel_size
+	global parent_size, pixel_size, test_frame
 	environment = os.environ.copy()
+	pixel_count = (parent_size[0] // pixel_size) * (parent_size[1] // pixel_size)
 
 	# start a new dbus session and set the environment variables
 	# equivalent of `export $(dbus-launch)`
@@ -92,7 +96,7 @@ def main():
 
 	print('Creating compositors')
 	pids = []
-	for i in range(1, 300 + 1):
+	for i in range(1, pixel_count + 1):
 		pid = create_compositor(i, pixel_size, environment.copy())
 		pids.append(pid)
 		time.sleep(0.05)
@@ -104,13 +108,13 @@ def main():
 	time.sleep(0.5)
 
 	# test frame
-	frame = [1] * 300
+	frame = [1] * pixel_count
 	set_frame(environment, frame)
 	time.sleep(2)
 
 	# test image
 	# open an image and read pixel data
-	frame = image_to_frame('badapple/ba-20x15-test.png')
+	frame = image_to_frame(test_frame)
 	set_frame(environment, frame)
 
 	print(pids)
