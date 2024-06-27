@@ -5,6 +5,8 @@
 # NOTE: may add unexpected system tray entries
 #       on my system, my tray got filled with Fcitx5 buttons
 #       they will eventually disappear after the script ends
+# NOTE: this will stress your computer, even after the script ends,
+#       as the system tries to clean up everything!
 
 # image source: https://archive.org/details/bad_apple_is.7z
 # downscaled with imagemagick to 20x15
